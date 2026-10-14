@@ -1,13 +1,13 @@
 # 50 Startups：多元線性迴歸（CRISP-DM）
 
-用 scikit-learn 解 Kaggle「50 Startups」多元線性迴歸問題：從 R&D、Administration、Marketing 三項支出與所在州別（State），預測新創公司的年度利潤（Profit）。整個專案嚴格依照 **CRISP-DM** 六個階段進行，並提供一份靜態報告與一個可在瀏覽器即時重算的互動式迴歸工具。
+用 scikit-learn 解 Kaggle「50 Startups」多元線性迴歸問題：從 R&D、Administration、Marketing 三項支出與所在州別（State），預測新創公司的年度利潤（Profit）。整個專案嚴格依照 **CRISP-DM** 六個階段進行，並提供一份靜態報告，以及一個可切換資料集與演算法、也能輸入任意 CSV 的互動式多元迴歸探索器。
 
 ## Demo
 
 | 頁面 | 說明 | 連結 |
 |---|---|---|
 | CRISP-DM 專案紀錄 | 靜態報告，逐階段呈現 EDA、特徵選擇、評估與部署結果 | https://aiot-dic-50startup.vercel.app/ |
-| 50 Startups 迴歸實驗室 | 互動工具：勾選特徵，即時重算係數、p 值、診斷圖、假設檢定與預測 | https://aiot-dic-50startup.vercel.app/app |
+| 多元線性迴歸探索器 | 互動工具：切換資料集與 5 種特徵選擇演算法、輸入網址或上傳 CSV，即時計算係數、p 值、診斷圖、假設檢定與預測 | https://aiot-dic-50startup.vercel.app/app |
 
 本機預覽：
 
@@ -64,19 +64,44 @@ python -m http.server 8000
 
 每種演算法都只看訓練集，以 5-fold CV RMSE 決定特徵，並記錄用 1 到 5 個特徵時的測試集 RMSE 與 R²。
 
-## 互動式迴歸實驗室（app.html）
+## 多元線性迴歸探索器（app.html）
 
-所有計算都在瀏覽器裡完成，不需要後端：
+所有計算都在瀏覽器裡完成，不需要後端。
 
-- **模型設定**：勾選特徵、一鍵套用「最終模型／CV 最佳／全部特徵」、切換顯著水準 α 與擬合資料（訓練集或全部）
-- **係數表**：B、SE、t、p 值、信賴區間、標準化 β、VIF，以及 ANOVA 表
-- **評估**：擬合 R²／Adj R²／F、5-fold CV R²、測試集 R²／RMSE／MAE／MAPE，並對照成功標準
-- **診斷圖**：實際 vs 預測、殘差 vs 預測值（標出 Cook's D 影響點）、標準化 β、殘差分布
-- **假設檢定**：Ramsey RESET（線性）、Breusch-Pagan（同質變異）、Jarque-Bera（常態）、Durbin-Watson、VIF、Cook's D
-- **特徵選擇**：5 種演算法比較圖、15 種特徵組合排行榜（點一下即套用）
-- **部署**：利潤預測器（95% 預測區間、外插警示）與 APA 7 報告段落
+### 1. 選擇資料集（下拉選單）
 
-`regression.js` 的所有輸出都已和 numpy／scipy／scikit-learn 逐項比對（最大相對誤差約 1e-12）。網頁使用和 `main.py` 相同的訓練／測試切分與 CV 分組（存在 `model_data.js`），所以數字與 Python 一致。
+| 選項 | 預測目標 | 說明 |
+|---|---|---|
+| 50 Startups | Profit | 本作業資料集，訓練／測試切分與 `main.py` 完全相同 |
+| Advertising | sales | ISLR 教科書：電視、廣播、報紙廣告預算 → 銷售量（200 筆） |
+| Medical Insurance | charges | 年齡、性別、BMI、子女數、吸菸、地區 → 醫療保險費（1,338 筆，含 3 個類別欄位） |
+| 自訂：輸入 CSV 網址 | 自選 | 例如 `https://raw.githubusercontent.com/Avik-Jain/100-Days-Of-ML-Code/master/datasets/50_Startups.csv`；GitHub 頁面網址會自動轉成 raw |
+| 自訂：上傳 CSV 檔 | 自選 | 拖曳或選擇檔案，只在瀏覽器內讀取，不會上傳到伺服器 |
+
+載入任意 CSV 時會自動：判斷數值／類別欄位、排除流水號與 ID 欄位、對類別欄位做 One-Hot 編碼（捨棄第一個類別當基準）、排除有缺值的列，再以固定種子 42 做 80/20 切分與 5-fold CV。可以改選預測目標，或取消勾選不想納入的欄位。
+
+### 2. 選擇特徵選擇演算法（選單）
+
+Lasso、Forward SFS、RFE、ElasticNet、Exhaustive Search，另有「比較全部 5 種」與「手動勾選」。
+
+### 3. 選擇特徵數 k
+
+k = 1 到 p。預設採 **1-SD 精簡原則**：在 CV RMSE 與最佳值相差不到一個標準差的 k 中，選特徵最少的。在 50 Startups 上，這會選出只用 R&D Spend 的模型，和 `main.py` 的最終模型一致。
+
+### 輸出
+
+- 指標卡片：Test RMSE、Test R²、Adjusted R²、MAE、F 統計量（與全部特徵模型比較）
+- RMSE／R² 對特徵數的折線圖，以及 5 種演算法比較表
+- 迴歸方程式、係數表（β、SE、t、p 值、信賴區間、標準化 β、VIF）、ANOVA
+- 診斷圖：實際 vs 預測、殘差 vs 預測值（標出 Cook's D 影響點）、標準化 β、殘差分布
+- 假設檢定：Ramsey RESET、Breusch-Pagan、Jarque-Bera、Durbin-Watson、VIF、Cook's D
+- 即時預測器（95% 預測區間、各項貢獻、外插警示）
+- 測試集殘差排行與離群值診斷、結果解讀、APA 7 報告段落
+
+### 驗證
+
+- `regression.js` 的所有統計量都已和 numpy／scipy／scikit-learn 逐項比對（最大相對誤差約 1e-12）。
+- `selection.js` 的 5 種演算法在 50 Startups 上，k = 1～5 共 25 組選到的特徵都與 `feature_progression_analysis.py` 完全相同。
 
 ## 專案結構
 
@@ -84,8 +109,10 @@ python -m http.server 8000
 main.py                              CRISP-DM 六階段主程式
 feature_progression_analysis.py      5 種特徵選擇演算法 × 1～5 個特徵
 regression.js                        瀏覽器端 OLS 統計引擎
-index.html                           靜態報告
-app.html                             互動式迴歸實驗室
+selection.js                         瀏覽器端 CSV 解析、編碼、切分與 5 種特徵選擇演算法
+index.html                           50 Startups 靜態報告
+app.html                             多元線性迴歸探索器
+datasets/                            內建資料集：Advertising.csv、insurance.csv
 model_data.json / model_data.js      main.py 產生的網頁資料
 50_Startups.csv                      資料集（沒有時 main.py 會自動下載並驗證）
 requirements.txt                     Python 套件版本
@@ -124,7 +151,9 @@ python feature_progression_analysis.py
 ## 致謝與參考資料
 
 - **資料集**：[50 Startups](https://www.kaggle.com/code/akash17/50-startups-linearregression)（Kaggle）。程式從 [krishnaik06/Multiple-Linear-Regression](https://github.com/krishnaik06/Multiple-Linear-Regression) 的公開副本下載，並比對 SHA-256 確認與其他獨立副本一致。
-- **互動頁設計參考**：[StatsUnlock — Multiple Linear Regression Calculator](https://statsunlock.com/multiple-linear-regression-calculator/)。互動頁的資訊架構（摘要卡片、完整係數表、ANOVA、四張診斷圖、假設檢定徽章、結果解讀與 APA 報告段落）參考了這個網站。
+- **版面參考**：[AIoT-DIC2 Multiple LR Explorer](https://huanchen1107.github.io/AIoT-DIC2-MultipleLR/)。網站的排版（麵包屑標題列、主視覺卡片、演算法與特徵數分段按鈕、指標卡片、測試集殘差表）參考了這個網站。
+- **統計計算機風格**：[StatsUnlock — Multiple Linear Regression Calculator](https://statsunlock.com/multiple-linear-regression-calculator/)。完整係數表、ANOVA、診斷圖、假設檢定徽章、結果解讀與 APA 報告段落參考了這個網站。
+- **其他資料集**：Advertising 取自 [*An Introduction to Statistical Learning*](https://www.statlearning.com/)（James, Witten, Hastie & Tibshirani）；Medical Insurance 取自 [stedy/Machine-Learning-with-R-datasets](https://github.com/stedy/Machine-Learning-with-R-datasets)。作業範例網址的 50 Startups 副本來自 [Avik-Jain/100-Days-Of-ML-Code](https://github.com/Avik-Jain/100-Days-Of-ML-Code)。
 - **方法論**：Chapman, P. et al. (2000). *CRISP-DM 1.0: Step-by-step data mining guide*.
 - **套件**：[scikit-learn](https://scikit-learn.org/)、[pandas](https://pandas.pydata.org/)、[NumPy](https://numpy.org/)、[SciPy](https://scipy.org/)、[Matplotlib](https://matplotlib.org/)、[joblib](https://joblib.readthedocs.io/)、[Requests](https://requests.readthedocs.io/)
-- **字型**：[Google Fonts](https://fonts.google.com/)：Archivo、Noto Sans TC、JetBrains Mono
+- **字型**：[Google Fonts](https://fonts.google.com/)：Inter、Noto Sans TC、JetBrains Mono

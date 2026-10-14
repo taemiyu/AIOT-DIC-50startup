@@ -193,6 +193,13 @@
     };
   }
 
-  root.Regression = { fit, dist, r2Of, mean, sd };
+  // Coefficients only - for cross-validation loops where the full set of
+  // statistics in fit() would be wasted work.
+  function lite(X, y) {
+    const c = core(withIntercept(X), y);
+    return { coef: c.b, predict: x => c.b[0] + x.reduce((s, v, j) => s + v * c.b[j + 1], 0) };
+  }
+
+  root.Regression = { fit, lite, dist, r2Of, mean, sd };
   if (typeof module !== "undefined") module.exports = root.Regression;
 })(typeof window !== "undefined" ? window : globalThis);

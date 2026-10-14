@@ -7,43 +7,48 @@
 <meta name="description" content="50 Startups 多元線性迴歸：CRISP-DM 六階段專案紀錄">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 body { margin: 0; }
 
-/* Layout: a single-column lab log; each CRISP-DM phase is a numbered entry on a vertical timeline rail, charts sit beside the findings they support. */
+/* Layout: shares the explorer's look (breadcrumb header, indigo hero); below it each CRISP-DM phase is a numbered entry on a vertical timeline rail. */
 :root {
-  --bg: #f5f7f9;
+  --bg: #f8fafc;
   --surface: #ffffff;
-  --fg: #16212e;
-  --muted: #5a6878;
-  --line: #d9e0e8;
-  --ink: #1d4e89;        /* primary: ledger ink blue */
-  --ink-soft: #e3ecf7;
-  --money: #14805e;      /* profit / pass */
-  --money-soft: #e0f2ea;
-  --warn: #b4581b;
-  --warn-soft: #fbeadc;
-  --neg: #b0413e;
-  --f-display: "Archivo", "Noto Sans TC", system-ui, sans-serif;
-  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --surface-2: #f1f5f9;
+  --fg: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --ink: #4f46e5;        /* primary: indigo */
+  --ink-soft: #eef2ff;
+  --on-ink: #ffffff;
+  --money: #059669;      /* profit / pass */
+  --money-soft: #ecfdf5;
+  --warn: #b45309;
+  --warn-soft: #fffbeb;
+  --neg: #dc2626;
+  --hero-a: #1e1b4b; --hero-b: #3730a3; --hero-c: #5b21b6;
+  --shadow: 0 1px 2px rgba(15, 23, 42, .05), 0 1px 3px rgba(15, 23, 42, .06);
+  --f-display: "Inter", "Noto Sans TC", system-ui, sans-serif;
+  --f-body: "Inter", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f151c; --surface: #17202a; --fg: #e4eaf1; --muted: #93a2b3; --line: #2a3644;
-    --ink: #7fb0ec; --ink-soft: #1c2c40; --money: #4cc79a; --money-soft: #15302a;
-    --warn: #e79a62; --warn-soft: #3a2618; --neg: #e3817d; color-scheme: dark;
+    --bg: #0b1120; --surface: #111827; --surface-2: #1e293b; --fg: #e2e8f0; --muted: #94a3b8; --line: #263247;
+    --ink: #818cf8; --ink-soft: #1e1b4b; --on-ink: #0b1120; --money: #34d399; --money-soft: #052e22;
+    --warn: #fbbf24; --warn-soft: #2b2007; --neg: #f87171; --shadow: none; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f151c; --surface: #17202a; --fg: #e4eaf1; --muted: #93a2b3; --line: #2a3644;
-  --ink: #7fb0ec; --ink-soft: #1c2c40; --money: #4cc79a; --money-soft: #15302a;
-  --warn: #e79a62; --warn-soft: #3a2618; --neg: #e3817d; color-scheme: dark;
+  --bg: #0b1120; --surface: #111827; --surface-2: #1e293b; --fg: #e2e8f0; --muted: #94a3b8; --line: #263247;
+  --ink: #818cf8; --ink-soft: #1e1b4b; --on-ink: #0b1120; --money: #34d399; --money-soft: #052e22;
+  --warn: #fbbf24; --warn-soft: #2b2007; --neg: #f87171; --shadow: none; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.65; }
-.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 64px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 24px 64px; }
+[hidden] { display: none !important; }
 h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.2; margin: 0; }
 h1 { font-size: clamp(1.7rem, 4vw, 2.5rem); font-weight: 800; letter-spacing: -0.01em; }
 h2 { font-size: 1.3rem; font-weight: 700; }
@@ -53,12 +58,26 @@ p { margin: 0; }
 .eyebrow { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 
 /* Header */
-header { display: grid; gap: 14px; margin-bottom: 28px; }
-.objective { border-left: 3px solid var(--ink); padding: 4px 0 4px 14px; color: var(--muted); max-width: 70ch; }
-.objective b { color: var(--fg); }
+.top-header { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; }
+.header-inner { max-width: 1240px; margin: 0 auto; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.breadcrumbs { display: flex; gap: 6px; font-size: 0.8rem; color: var(--muted); flex-wrap: wrap; }
+.breadcrumbs a { color: var(--muted); text-decoration: none; }
+.breadcrumbs a:hover { color: var(--ink); }
+.breadcrumbs b { color: var(--fg); font-weight: 600; }
+.top-header h1 { font-size: clamp(1.1rem, 2.4vw, 1.45rem); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+.brand-badge { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; background: var(--ink); color: var(--on-ink); padding: 2px 8px; border-radius: 99px; font-family: var(--f-body); }
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ref-btn { font-size: 0.8rem; font-weight: 600; text-decoration: none; color: var(--fg); border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 6px 12px; }
+.ref-btn:hover { border-color: var(--ink); color: var(--ink); }
+.ref-btn.primary { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
+.hero { background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c)); color: #fff; border-radius: 18px; padding: 28px clamp(20px, 4vw, 36px); display: grid; gap: 12px; margin-bottom: 20px; }
+.hero h2 { font-size: clamp(1.4rem, 3.2vw, 2rem); font-weight: 800; color: #fff; }
+.hero p { color: rgba(255, 255, 255, .84); max-width: 80ch; }
+.hero p b { color: #fff; }
+.hero .eyebrow { color: rgba(255, 255, 255, .7); }
 
 /* Fact strip */
-.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 36px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 36px; box-shadow: var(--shadow); }
 .facts > div { padding: 14px 18px; border-right: 1px solid var(--line); min-width: 0; }
 .facts > div:last-child { border-right: 0; }
 .facts .v { font-weight: 700; overflow-wrap: anywhere; }
@@ -73,7 +92,7 @@ header { display: grid; gap: 14px; margin-bottom: 28px; }
 .entry:last-child .rail::after { display: none; }
 .body { padding-bottom: 40px; min-width: 0; display: grid; gap: 16px; align-content: start; }
 .body > header { margin: 0; gap: 4px; padding-top: 4px; }
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; min-width: 0; box-shadow: var(--shadow); }
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
 .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 16px; }
 ul.clean { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
@@ -121,10 +140,10 @@ figure { margin: 0; }
 figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
 
 /* Takeaways */
-.takeaways { background: var(--ink); color: var(--surface); border-radius: 12px; padding: 24px; display: grid; gap: 16px; margin-top: 8px; }
-.takeaways h2 { color: var(--surface); }
+.takeaways { background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c)); color: #fff; border-radius: 12px; padding: 24px; display: grid; gap: 16px; margin-top: 8px; }
+.takeaways h2 { color: #fff; }
 .takeaways .grid3 { grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr)); }
-.takeaways .grid3 > div { border-top: 1px solid color-mix(in srgb, var(--surface) 35%, transparent); padding-top: 10px; }
+.takeaways .grid3 > div { border-top: 1px solid rgba(255, 255, 255, .3); padding-top: 10px; }
 .takeaways b { font-family: var(--f-display); font-size: 1.05rem; display: block; }
 .takeaways p { opacity: 0.85; font-size: 0.88rem; }
 
@@ -137,9 +156,9 @@ figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
 </style>
 
 <style>
-:root { --s1: #1d4e89; --s2: #c2611f; --s3: #14805e; --s4: #b0413e; --s5: #7a4fb0; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --s1: #7fb0ec; --s2: #f0a05e; --s3: #4cc79a; --s4: #ef8a86; --s5: #b796e8; } }
-:root[data-theme="dark"] { --s1: #7fb0ec; --s2: #f0a05e; --s3: #4cc79a; --s4: #ef8a86; --s5: #b796e8; }
+:root { --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; } }
+:root[data-theme="dark"] { --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.82rem; margin-bottom: 8px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
@@ -152,13 +171,24 @@ figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
 
 </head>
 <body>
+<header class="top-header">
+  <div class="header-inner">
+    <div>
+      <nav class="breadcrumbs" aria-label="麵包屑"><b>首頁</b><span aria-hidden="true">›</span><a href="app.html">迴歸分析</a></nav>
+      <h1>50 Startups 專案報告 <span class="brand-badge">CRISP-DM</span></h1>
+    </div>
+    <div class="header-actions">
+      <a class="ref-btn primary" href="app.html">開啟多元迴歸探索器 →</a>
+      <a class="ref-btn" href="https://statsunlock.com/multiple-linear-regression-calculator/" target="_blank" rel="noopener">Style Ref: StatsUnlock ↗</a>
+    </div>
+  </div>
+</header>
 <div class="wrap">
-  <header>
+  <section class="hero" aria-labelledby="heroTitle">
     <span class="eyebrow" id="eyebrow">AIoT · Multiple Linear Regression</span>
-    <h1>50 Startups：CRISP-DM 機器學習專案紀錄</h1>
-    <p class="objective"><b>目標：</b>依 CRISP-DM 六階段，用 scikit-learn 建立多元線性迴歸模型，從研發、行政、行銷支出與所在州別預測新創公司的年度利潤（Profit）。</p>
-    <p><a href="app.html" style="color:var(--ink);font-weight:600">開啟互動版：50 Startups 迴歸實驗室 →</a></p>
-  </header>
+    <h2 id="heroTitle">50 Startups：CRISP-DM 機器學習專案紀錄</h2>
+    <p><b>目標：</b>依 CRISP-DM 六階段，用 scikit-learn 建立多元線性迴歸模型，從研發、行政、行銷支出與所在州別預測新創公司的年度利潤（Profit）。想換資料集、切換演算法或上傳自己的 CSV，請用<a href="app.html" style="color:#fff;font-weight:700">多元迴歸探索器</a>。</p>
+  </section>
 
   <div id="missing" class="missing" hidden>找不到 <span class="mono">model_data.js</span>。請先執行 <span class="mono">python main.py</span> 產生資料，再重新整理這個頁面。</div>
 
@@ -424,6 +454,14 @@ figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
   </section>
   </div>
 </div>
+
+<footer style="border-top:1px solid var(--line);background:var(--surface);padding:28px 20px 40px;font-size:0.86rem;color:var(--muted)">
+  <div style="max-width:1240px;margin:0 auto;display:grid;gap:6px">
+    <b style="color:var(--fg)">參考資料與致謝</b>
+    <span>版面參考：<a href="https://huanchen1107.github.io/AIoT-DIC2-MultipleLR/" target="_blank" rel="noopener" style="color:var(--ink)">AIoT-DIC2 Multiple LR Explorer</a>；統計計算機風格：<a href="https://statsunlock.com/multiple-linear-regression-calculator/" target="_blank" rel="noopener" style="color:var(--ink)">StatsUnlock Multiple Linear Regression Calculator</a></span>
+    <span>資料集：50 Startups（Kaggle）；方法論：CRISP-DM</span>
+  </div>
+</footer>
 
 <script src="model_data.js"></script>
 <script>
