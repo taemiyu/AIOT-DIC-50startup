@@ -4,10 +4,12 @@
 
 ## Demo
 
-| 頁面 | 說明 | 連結 |
-|---|---|---|
-| CRISP-DM 專案紀錄 | 靜態報告，逐階段呈現 EDA、特徵選擇、評估與部署結果 | https://aiot-dic-50startup.vercel.app/ |
-| 多元線性迴歸探索器 | 互動工具：切換資料集與 5 種特徵選擇演算法、輸入網址或上傳 CSV，即時計算係數、p 值、診斷圖、假設檢定與預測 | https://aiot-dic-50startup.vercel.app/app |
+| 頁面 | 說明 | Vercel | GitHub Pages |
+|---|---|---|---|
+| CRISP-DM 專案紀錄 | 靜態報告，逐階段呈現 EDA、特徵選擇、評估與部署結果 | https://aiot-dic-50startup.vercel.app/ | https://taemiyu.github.io/AIOT-DIC-50startup/ |
+| 多元線性迴歸探索器 | 互動工具：切換資料集與 5 種特徵選擇演算法、輸入網址或上傳 CSV，即時計算係數、p 值、診斷圖、假設檢定與預測 | https://aiot-dic-50startup.vercel.app/app | https://taemiyu.github.io/AIOT-DIC-50startup/app.html |
+
+兩個網站內容相同，push 到 `main` 後都會自動更新。
 
 - GitHub：https://github.com/taemiyu/AIOT-DIC-50startup
 
@@ -197,6 +199,8 @@ python feature_progression_analysis.py
 網頁都是靜態檔案，不需要安裝或建置步驟（設定在 `vercel.json`）。本專案已透過 Vercel 匯入 GitHub repo 部署，每次 push 到 `main` 都會自動重新部署。
 
 自行部署：在 Vercel 匯入此 repo，Application Preset 選 **Other**，Build Command 與 Install Command 設為 `echo skip`，其他維持預設。
+
+同時也以 **GitHub Pages** 發布（Settings → Pages → Deploy from a branch → `main` / `(root)`）。根目錄的 `.nojekyll` 讓 GitHub 不經 Jekyll 處理，檔案原樣發布。GitHub Pages 沒有 clean URL，探索器網址需加 `.html`。
 
 ## 致謝與參考資料
 
