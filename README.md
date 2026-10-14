@@ -32,6 +32,10 @@ python -m http.server 8000
 
 ![探索器總覽：資料集、演算法、特徵數與指標](docs/screenshots/explorer-overview.jpg)
 
+資料集下拉選單：4 個內建資料集（50 Startups、Advertising、Medical Insurance、Boston Housing），以及輸入 CSV 網址、上傳 CSV 檔兩種自訂方式。
+
+![資料集下拉選單展開](docs/screenshots/explorer-dataset-menu.jpg)
+
 **2. 比較全部 5 種演算法**：RMSE／R² 對特徵數的折線圖，以及各演算法的最佳子集比較表。
 
 ![5 種特徵選擇演算法比較](docs/screenshots/explorer-compare.jpg)
