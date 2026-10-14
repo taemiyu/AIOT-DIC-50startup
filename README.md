@@ -6,10 +6,8 @@
 
 | 頁面 | 說明 | 連結 |
 |---|---|---|
-| CRISP-DM 專案紀錄 | 靜態報告，逐階段呈現 EDA、特徵選擇、評估與部署結果 | `https://<your-project>.vercel.app/` |
-| 50 Startups 迴歸實驗室 | 互動工具：勾選特徵，即時重算係數、p 值、診斷圖、假設檢定與預測 | `https://<your-project>.vercel.app/app` |
-
-> 部署到 Vercel 後（見下方〈部署〉），把 `<your-project>` 換成實際網址。
+| CRISP-DM 專案紀錄 | 靜態報告，逐階段呈現 EDA、特徵選擇、評估與部署結果 | https://aiot-dic-50startup.vercel.app/ |
+| 50 Startups 迴歸實驗室 | 互動工具：勾選特徵，即時重算係數、p 值、診斷圖、假設檢定與預測 | https://aiot-dic-50startup.vercel.app/app |
 
 本機預覽：
 
@@ -119,13 +117,9 @@ python feature_progression_analysis.py
 
 ## 部署
 
-網頁都是靜態檔案，不需要建置步驟。部署到 Vercel：
+網頁都是靜態檔案，不需要安裝或建置步驟（設定在 `vercel.json`）。本專案已透過 Vercel 匯入 GitHub repo 部署，每次 push 到 `main` 都會自動重新部署。
 
-```bash
-npx vercel
-```
-
-第一次執行會要求登入並連結專案。完成後把上方 Demo 表格裡的網址換成實際網址。
+自行部署：在 Vercel 匯入此 repo，Application Preset 選 **Other**，Build Command 與 Install Command 設為 `echo skip`，其他維持預設。
 
 ## 致謝與參考資料
 
