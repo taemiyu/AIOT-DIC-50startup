@@ -237,6 +237,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
           <option value="startups">50 Startups：預測新創公司利潤</option>
           <option value="advertising">Advertising：預測廣告後的銷售量</option>
           <option value="insurance">Medical Insurance：預測醫療保險費</option>
+          <option value="boston">Boston Housing：預測波士頓房價</option>
           <option value="url">自訂資料集：輸入 CSV 網址</option>
           <option value="upload">自訂資料集：上傳 CSV 檔</option>
         </select>
@@ -265,6 +266,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
           <span class="small muted">候選特徵（取消勾選可排除欄位）：</span>
         </div>
         <div class="seg" id="poolChips"></div>
+        <div class="msg info" id="dsNotice" hidden></div>
         <details><summary>預覽資料（前 8 列）</summary><div class="tbl" style="margin-top:8px"><table id="preview"></table></div></details>
       </div>
     </div>
@@ -378,7 +380,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
       <ul>
         <li>版面參考：<a href="https://huanchen1107.github.io/AIoT-DIC2-MultipleLR/" target="_blank" rel="noopener">AIoT-DIC2 Multiple LR Explorer</a></li>
         <li>統計計算機風格：<a href="https://statsunlock.com/multiple-linear-regression-calculator/" target="_blank" rel="noopener">StatsUnlock Multiple Linear Regression Calculator</a></li>
-        <li>資料集：50 Startups（Kaggle）、Advertising（<a href="https://www.statlearning.com/" target="_blank" rel="noopener">ISLR</a>）、Medical Insurance（<a href="https://github.com/stedy/Machine-Learning-with-R-datasets" target="_blank" rel="noopener">stedy/Machine-Learning-with-R-datasets</a>）</li>
+        <li>資料集：50 Startups（Kaggle）、Advertising（<a href="https://www.statlearning.com/" target="_blank" rel="noopener">ISLR</a>）、Medical Insurance（<a href="https://github.com/stedy/Machine-Learning-with-R-datasets" target="_blank" rel="noopener">stedy/Machine-Learning-with-R-datasets</a>）、Boston Housing（Harrison &amp; Rubinfeld, 1978；檔案取自 <a href="https://github.com/selva86/datasets" target="_blank" rel="noopener">selva86/datasets</a>）</li>
         <li>方法論：CRISP-DM（Cross-Industry Standard Process for Data Mining）</li>
       </ul>
     </div>
@@ -401,6 +403,10 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
       desc: "200 個市場的電視、廣播、報紙廣告預算（千美元）→ 銷售量（千件），ISLR 教科書資料" },
     insurance: { name: "Medical Insurance", file: "datasets/insurance.csv", target: "charges", unit: "$",
       desc: "1,338 位投保人的年齡、性別、BMI、子女數、是否吸菸、地區 → 醫療保險費" },
+    boston: { name: "Boston Housing", file: "datasets/BostonHousing.csv", target: "medv", unit: "",
+      desc: "506 個波士頓地區的犯罪率、平均房間數、低收入人口比例等 13 個變數 → 自有住宅價格中位數 medv（千美元）",
+      exclude: { b: "依各區黑人居民比例計算，帶有種族偏見的假設" },
+      notice: "欄位 b 是依各區黑人居民比例計算的變數，帶有種族偏見的假設，scikit-learn 1.2 起已因此移除這個資料集。這裡預設排除 b；如需重現原始研究可手動勾選。" },
   };
 
   const st = { ds: null, algo: "lasso", k: 1, manual: new Set(), alpha: 0.05, mode: "train", resAll: false };
@@ -538,7 +544,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
     if (!numeric.length) { msg("err", "找不到任何數值欄位，無法當作預測目標。"); return; }
     const target = meta.target && numeric.some(c => c.name === meta.target) ? meta.target : numeric[numeric.length - 1].name;
     const ds = Object.assign({ header: P.header, rows: P.rows, cols, target, skipped: P.skipped }, meta);
-    ds.pool = new Set(cols.filter(c => c.type !== "id" && c.name !== target).map(c => c.name));
+    ds.pool = new Set(cols.filter(c => c.type !== "id" && c.name !== target && !(meta.exclude && meta.exclude[c.name])).map(c => c.name));
     if (!ds.pool.size) { msg("err", "除了目標欄以外沒有可用的特徵欄位。"); return; }
     st.ds = ds;
     renderDataPanel();
@@ -561,8 +567,11 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
         cb.checked ? ds.pool.add(c.name) : ds.pool.delete(c.name);
         prepare(true);
       });
-      return h("label", { class: "check-chip" + (off ? " off" : ""), title: c.note || "" }, cb, c.name, h("span", { class: "type", text: off ? "排除：" + c.note : c.type === "numeric" ? "數值" : `類別·${c.levels.length}` }));
+      const why = ds.exclude && ds.exclude[c.name];
+      return h("label", { class: "check-chip" + (off ? " off" : ""), title: c.note || why || "" }, cb, c.name, h("span", { class: "type", text: off ? "排除：" + c.note : why ? "預設排除" : c.type === "numeric" ? "數值" : `類別·${c.levels.length}` }));
     }));
+    $("dsNotice").textContent = ds.notice || "";
+    $("dsNotice").hidden = !ds.notice;
     $("preview").replaceChildren(h("thead", {}, h("tr", {}, ds.header.map(c => h("th", { text: c })))), h("tbody", {}, ds.rows.slice(0, 8).map(r => h("tr", {}, r.map(v => h("td", { text: v }))))));
   }
 
@@ -637,7 +646,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
   dz.addEventListener("drop", e => loadFile(e.dataTransfer.files[0]));
   $("targetSelect").addEventListener("change", e => {
     const ds = st.ds; ds.target = e.target.value;
-    ds.pool = new Set(ds.cols.filter(c => c.type !== "id" && c.name !== ds.target).map(c => c.name));
+    ds.pool = new Set(ds.cols.filter(c => c.type !== "id" && c.name !== ds.target && !(ds.exclude && ds.exclude[c.name])).map(c => c.name));
     renderDataPanel(); prepare(true);
   });
   $("alpha").addEventListener("change", e => { st.alpha = +e.target.value; render(); });

@@ -75,6 +75,7 @@ python -m http.server 8000
 | 50 Startups | Profit | 本作業資料集，訓練／測試切分與 `main.py` 完全相同 |
 | Advertising | sales | ISLR 教科書：電視、廣播、報紙廣告預算 → 銷售量（200 筆） |
 | Medical Insurance | charges | 年齡、性別、BMI、子女數、吸菸、地區 → 醫療保險費（1,338 筆，含 3 個類別欄位） |
+| Boston Housing | medv | 犯罪率、平均房間數、低收入人口比例等 13 個變數 → 房價中位數（506 筆）。欄位 `b` 依各區黑人居民比例計算、帶有種族偏見的假設（scikit-learn 1.2 起已因此移除此資料集），預設排除，可手動勾選 |
 | 自訂：輸入 CSV 網址 | 自選 | 例如 `https://raw.githubusercontent.com/Avik-Jain/100-Days-Of-ML-Code/master/datasets/50_Startups.csv`；GitHub 頁面網址會自動轉成 raw |
 | 自訂：上傳 CSV 檔 | 自選 | 拖曳或選擇檔案，只在瀏覽器內讀取，不會上傳到伺服器 |
 
@@ -112,7 +113,7 @@ regression.js                        瀏覽器端 OLS 統計引擎
 selection.js                         瀏覽器端 CSV 解析、編碼、切分與 5 種特徵選擇演算法
 index.html                           50 Startups 靜態報告
 app.html                             多元線性迴歸探索器
-datasets/                            內建資料集：Advertising.csv、insurance.csv
+datasets/                            內建資料集：Advertising.csv、insurance.csv、BostonHousing.csv
 model_data.json / model_data.js      main.py 產生的網頁資料
 50_Startups.csv                      資料集（沒有時 main.py 會自動下載並驗證）
 requirements.txt                     Python 套件版本
@@ -153,7 +154,7 @@ python feature_progression_analysis.py
 - **資料集**：[50 Startups](https://www.kaggle.com/code/akash17/50-startups-linearregression)（Kaggle）。程式從 [krishnaik06/Multiple-Linear-Regression](https://github.com/krishnaik06/Multiple-Linear-Regression) 的公開副本下載，並比對 SHA-256 確認與其他獨立副本一致。
 - **版面參考**：[AIoT-DIC2 Multiple LR Explorer](https://huanchen1107.github.io/AIoT-DIC2-MultipleLR/)。網站的排版（麵包屑標題列、主視覺卡片、演算法與特徵數分段按鈕、指標卡片、測試集殘差表）參考了這個網站。
 - **統計計算機風格**：[StatsUnlock — Multiple Linear Regression Calculator](https://statsunlock.com/multiple-linear-regression-calculator/)。完整係數表、ANOVA、診斷圖、假設檢定徽章、結果解讀與 APA 報告段落參考了這個網站。
-- **其他資料集**：Advertising 取自 [*An Introduction to Statistical Learning*](https://www.statlearning.com/)（James, Witten, Hastie & Tibshirani）；Medical Insurance 取自 [stedy/Machine-Learning-with-R-datasets](https://github.com/stedy/Machine-Learning-with-R-datasets)。作業範例網址的 50 Startups 副本來自 [Avik-Jain/100-Days-Of-ML-Code](https://github.com/Avik-Jain/100-Days-Of-ML-Code)。
+- **其他資料集**：Advertising 取自 [*An Introduction to Statistical Learning*](https://www.statlearning.com/)（James, Witten, Hastie & Tibshirani）；Medical Insurance 取自 [stedy/Machine-Learning-with-R-datasets](https://github.com/stedy/Machine-Learning-with-R-datasets)；Boston Housing 原始研究為 Harrison, D. & Rubinfeld, D. L. (1978), *Hedonic prices and the demand for clean air*，檔案取自 [selva86/datasets](https://github.com/selva86/datasets)。作業範例網址的 50 Startups 副本來自 [Avik-Jain/100-Days-Of-ML-Code](https://github.com/Avik-Jain/100-Days-Of-ML-Code)。
 - **方法論**：Chapman, P. et al. (2000). *CRISP-DM 1.0: Step-by-step data mining guide*.
 - **套件**：[scikit-learn](https://scikit-learn.org/)、[pandas](https://pandas.pydata.org/)、[NumPy](https://numpy.org/)、[SciPy](https://scipy.org/)、[Matplotlib](https://matplotlib.org/)、[joblib](https://joblib.readthedocs.io/)、[Requests](https://requests.readthedocs.io/)
 - **字型**：[Google Fonts](https://fonts.google.com/)：Inter、Noto Sans TC、JetBrains Mono

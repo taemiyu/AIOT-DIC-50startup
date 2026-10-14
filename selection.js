@@ -124,25 +124,63 @@
   // ---------------------------------------------------------------- algorithms
   const pick = (X, cols) => X.map(r => cols.map(j => r[j]));
 
+  // Cross-validation fits thousands of subsets on the same folds (exhaustive
+  // search: 2^p - 1). Each fold's X'X and X'y (with intercept, columns scaled
+  // to unit max for conditioning) are computed once; a subset then only needs
+  // a small solve on the matching sub-matrix.
+  const foldCache = new WeakMap();
+  function foldGrams(X, y, folds) {
+    let byFolds = foldCache.get(X);
+    if (!byFolds) { byFolds = new WeakMap(); foldCache.set(X, byFolds); }
+    let g = byFolds.get(folds);
+    if (g && g.y === y) return g;
+    const n = X.length, p = X[0].length;
+    const s = [1, ...Array.from({ length: p }, (_, j) => Math.max(...X.map(r => Math.abs(r[j]))) || 1)];
+    const Z = X.map(r => [1, ...r.map((v, j) => v / s[j + 1])]);
+    g = folds.map(f => {
+      const inF = new Set(f), G = Array.from({ length: p + 1 }, () => new Float64Array(p + 1)), c = new Float64Array(p + 1);
+      for (let i = 0; i < n; i++) {
+        if (inF.has(i)) continue;
+        const z = Z[i];
+        for (let a = 0; a <= p; a++) { c[a] += z[a] * y[i]; for (let b = a; b <= p; b++) G[a][b] += z[a] * z[b]; }
+      }
+      for (let a = 0; a <= p; a++) for (let b = 0; b < a; b++) G[a][b] = G[b][a];
+      return { G, c, test: f };
+    });
+    g.Z = Z; g.y = y;
+    byFolds.set(folds, g);
+    return g;
+  }
+  function solve(A, b) {
+    const n = b.length, M = A.map((r, i) => [...r, b[i]]);
+    for (let c = 0; c < n; c++) {
+      let piv = c;
+      for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[piv][c])) piv = r;
+      if (Math.abs(M[piv][c]) < 1e-12) throw new Error("singular matrix");
+      [M[c], M[piv]] = [M[piv], M[c]];
+      for (let r = c + 1; r < n; r++) { const f = M[r][c] / M[c][c]; if (f) for (let j = c; j <= n; j++) M[r][j] -= f * M[c][j]; }
+    }
+    const x = new Array(n).fill(0);
+    for (let r = n - 1; r >= 0; r--) { let v = M[r][n]; for (let j = r + 1; j < n; j++) v -= M[r][j] * x[j]; x[r] = v / M[r][r]; }
+    return x;
+  }
+  function cvFoldPredictions(X, y, cols, folds) {
+    const g = foldGrams(X, y, folds), idx = [0, ...cols.map(j => j + 1)];
+    return g.map(({ G, c, test }) => {
+      const b = solve(idx.map(a => idx.map(bb => G[a][bb])), idx.map(a => c[a]));
+      return test.map(i => idx.reduce((sum, a, t) => sum + b[t] * g.Z[i][a], 0));
+    });
+  }
   function cvRMSE(X, y, cols, folds) { return cvRMSEStats(X, y, cols, folds).mean; }
   function cvRMSEStats(X, y, cols, folds) {
-    const n = y.length;
-    const scores = folds.map(f => {
-      const inF = new Set(f), tr = [...Array(n).keys()].filter(i => !inF.has(i));
-      const m = R.lite(tr.map(i => cols.map(j => X[i][j])), tr.map(i => y[i]));
-      const se = f.map(i => (y[i] - m.predict(cols.map(j => X[i][j]))) ** 2);
-      return Math.sqrt(R.mean(se));
-    });
+    const preds = cvFoldPredictions(X, y, cols, folds);
+    const scores = folds.map((f, k) => Math.sqrt(R.mean(f.map((i, t) => (y[i] - preds[k][t]) ** 2))));
     const mu = R.mean(scores);
     return { mean: mu, std: Math.sqrt(R.mean(scores.map(v => (v - mu) ** 2))) };
   }
   function cvR2(X, y, cols, folds) {
-    const n = y.length;
-    const s = folds.map(f => {
-      const inF = new Set(f), tr = [...Array(n).keys()].filter(i => !inF.has(i));
-      const m = R.lite(tr.map(i => cols.map(j => X[i][j])), tr.map(i => y[i]));
-      return R.r2Of(f.map(i => y[i]), f.map(i => m.predict(cols.map(j => X[i][j]))));
-    });
+    const preds = cvFoldPredictions(X, y, cols, folds);
+    const s = folds.map((f, k) => R.r2Of(f.map(i => y[i]), preds[k]));
     const mu = R.mean(s);
     return { mean: mu, std: Math.sqrt(R.mean(s.map(v => (v - mu) ** 2))), folds: s };
   }
