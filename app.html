@@ -60,9 +60,6 @@ main { display: grid; gap: 20px; padding-block: 24px 64px; }
 /* Hero */
 .hero { background: var(--hero-bg); color: var(--text); border-radius: 18px; padding: 28px clamp(20px, 4vw, 36px); display: grid; gap: 12px; position: relative; overflow: hidden; }
 .hero > * { position: relative; z-index: 1; max-width: min(760px, 100%); }
-.hero .sleepy { position: absolute; right: clamp(12px, 3vw, 40px); bottom: 0; width: clamp(150px, 20vw, 220px); z-index: 0; color: var(--cat); max-width: none; }
-.hero .sleepy .zz { fill: var(--hero-sub); }
-@media (max-width: 720px) { .hero .sleepy { position: static; justify-self: end; width: 130px; margin: -6px -8px -28px 0; } }
 body { overflow-x: clip; }
 .hero h2 { font-size: clamp(1.4rem, 3.2vw, 2rem); font-weight: 800; }
 .hero p { color: var(--hero-sub); max-width: 70ch; }
@@ -227,7 +224,6 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
     <h2 id="heroTitle">特徵選擇與精簡模型分析</h2>
     <p id="heroText">載入資料中…</p>
     <div class="hero-chips" id="heroChips"></div>
-    <svg class="sleepy" viewBox="0 0 160 92" aria-hidden="true"><path d="M46 90c-14 0-22-7-20-17 3-13 22-22 47-22 30 0 52 10 54 25 1 9-6 14-20 14Z" fill="currentColor"/><path d="M106 90c15 0 25-4 23-12-1-6-8-7-11-3" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M27 80c-11 0-17-7-16-16 1-7 4-11 4-11l-2-15 12 9c4-2 10-2 14 0l12-9-2 15s3 4 4 11c1 9-6 16-17 16Z" fill="currentColor" stroke="var(--hero-bg)" stroke-width="2.5" paint-order="stroke"/><g class="zz" font-family="Noto Serif TC, serif"><text x="50" y="34" font-size="15">z</text><text x="60" y="22" font-size="11">z</text><text x="68" y="13" font-size="8">z</text></g></svg>
   </section>
 
   <section class="card" id="controls" aria-label="分析設定">
