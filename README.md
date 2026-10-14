@@ -9,12 +9,56 @@
 | CRISP-DM 專案紀錄 | 靜態報告，逐階段呈現 EDA、特徵選擇、評估與部署結果 | https://aiot-dic-50startup.vercel.app/ |
 | 多元線性迴歸探索器 | 互動工具：切換資料集與 5 種特徵選擇演算法、輸入網址或上傳 CSV，即時計算係數、p 值、診斷圖、假設檢定與預測 | https://aiot-dic-50startup.vercel.app/app |
 
+- GitHub：https://github.com/taemiyu/AIOT-DIC-50startup
+
 本機預覽：
 
 ```bash
 python -m http.server 8000
 # 開啟 http://localhost:8000/ 與 http://localhost:8000/app.html
 ```
+
+## 網站截圖
+
+### CRISP-DM 專案報告（[首頁](https://aiot-dic-50startup.vercel.app/)）
+
+逐階段呈現 50 Startups 的資料取得、商業理解、EDA、特徵選擇、建模、評估與部署。
+
+![CRISP-DM 專案報告首頁](docs/screenshots/report-home.jpg)
+
+### 多元線性迴歸探索器（[/app](https://aiot-dic-50startup.vercel.app/app)）
+
+**1. 選擇資料集、演算法與特徵數 k**：下拉選單切換資料集；演算法選單有 5 種特徵選擇方法；k 按鈕上的貓掌標示 1-SD 精簡原則選出的 k。下方指標卡片即時更新。
+
+![探索器總覽：資料集、演算法、特徵數與指標](docs/screenshots/explorer-overview.jpg)
+
+**2. 比較全部 5 種演算法**：RMSE／R² 對特徵數的折線圖，以及各演算法的最佳子集比較表。
+
+![5 種特徵選擇演算法比較](docs/screenshots/explorer-compare.jpg)
+
+**3. 迴歸方程式、係數表與 ANOVA**：β、標準誤、t、p 值、信賴區間、標準化 β、VIF。
+
+![迴歸方程式、係數表與 ANOVA](docs/screenshots/explorer-coef.jpg)
+
+**4. 診斷圖與假設檢定**：實際 vs 預測（訓練實心、測試空心）、殘差 vs 預測值（紅圈為 Cook's D 影響點）、標準化 β、殘差分布，以及 RESET、Breusch-Pagan、Jarque-Bera、Durbin-Watson、VIF、Cook's D 檢定。
+
+![診斷圖與假設檢定](docs/screenshots/explorer-diag.jpg)
+
+**5. 即時預測器與測試集殘差診斷**：拉動滑桿即時預測，附 95% 預測區間與各項貢獻；下方依 |殘差| 排序列出測試集。
+
+![即時預測器與測試集殘差](docs/screenshots/explorer-predictor.jpg)
+
+**6. 內建資料集：Boston Housing**：自動判斷欄位型別，欄位 `b` 預設排除並說明原因。
+
+![Boston Housing 資料集](docs/screenshots/explorer-boston.jpg)
+
+**7. 自訂資料集：輸入 CSV 網址**：以作業範例網址 `https://raw.githubusercontent.com/Avik-Jain/100-Days-Of-ML-Code/master/datasets/50_Startups.csv` 載入。
+
+![輸入 CSV 網址載入資料](docs/screenshots/explorer-custom.jpg)
+
+**8. 自訂資料集：上傳 CSV 檔**：拖曳或點選檔案，只在瀏覽器內讀取。
+
+![上傳 CSV 檔](docs/screenshots/explorer-upload.jpg)
 
 ## 結果摘要
 
@@ -123,6 +167,7 @@ vercel.json                          Vercel 靜態網站設定
 {method}_plot.png                    各演算法的 RMSE／R² 對特徵數圖
 all_5_algorithms_comparison_plot.png 5 種演算法的 Test RMSE 比較
 feature_selection_comparison.csv/png 各演算法最佳子集比較
+docs/screenshots/                    README 用的網站截圖
 crispdm_output/                      各階段圖表、部署模型（.joblib）、final_report.json
 ```
 
