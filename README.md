@@ -157,4 +157,4 @@ python feature_progression_analysis.py
 - **其他資料集**：Advertising 取自 [*An Introduction to Statistical Learning*](https://www.statlearning.com/)（James, Witten, Hastie & Tibshirani）；Medical Insurance 取自 [stedy/Machine-Learning-with-R-datasets](https://github.com/stedy/Machine-Learning-with-R-datasets)；Boston Housing 原始研究為 Harrison, D. & Rubinfeld, D. L. (1978), *Hedonic prices and the demand for clean air*，檔案取自 [selva86/datasets](https://github.com/selva86/datasets)。作業範例網址的 50 Startups 副本來自 [Avik-Jain/100-Days-Of-ML-Code](https://github.com/Avik-Jain/100-Days-Of-ML-Code)。
 - **方法論**：Chapman, P. et al. (2000). *CRISP-DM 1.0: Step-by-step data mining guide*.
 - **套件**：[scikit-learn](https://scikit-learn.org/)、[pandas](https://pandas.pydata.org/)、[NumPy](https://numpy.org/)、[SciPy](https://scipy.org/)、[Matplotlib](https://matplotlib.org/)、[joblib](https://joblib.readthedocs.io/)、[Requests](https://requests.readthedocs.io/)
-- **字型**：[Google Fonts](https://fonts.google.com/)：Inter、Noto Sans TC、JetBrains Mono
+- **字型**：[Google Fonts](https://fonts.google.com/)：Noto Serif TC（標題）、Inter、Noto Sans TC、JetBrains Mono

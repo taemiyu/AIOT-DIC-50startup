@@ -7,46 +7,32 @@
 <meta name="description" content="多元線性迴歸探索器：切換資料集與 5 種特徵選擇演算法，或輸入任意 CSV，即時計算係數、p 值、診斷與預測。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: explorer dashboard. Breadcrumb header, indigo hero, one control card (dataset -> algorithm -> k), then KPI row, charts, model detail, predictor, residuals. Everything re-renders from one state object. */
+/* Layout: explorer dashboard. Breadcrumb header, matcha hero with a sleeping kitten, one control card (dataset -> algorithm -> k), then KPI row, charts, model detail, predictor, residuals. */
+/* Palette "matcha & washi": rice-paper neutrals, sage primary, ochre accent. Light only.
+   Chart series are validated (OKLab CVD >= 8 on adjacent pairs, contrast >= 3:1 on the surface). */
 :root {
-  --bg: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9; --border: #e2e8f0;
-  --text: #0f172a; --text-2: #334155; --muted: #64748b; --faint: #94a3b8;
-  --primary: #4f46e5; --primary-2: #4338ca; --primary-soft: #eef2ff; --on-primary: #ffffff;
-  --hero-a: #1e1b4b; --hero-b: #3730a3; --hero-c: #5b21b6;
-  --ok: #059669; --ok-soft: #ecfdf5; --warn: #b45309; --warn-soft: #fffbeb; --bad: #dc2626; --bad-soft: #fef2f2;
-  /* dataviz reference palette: categorical slots 1-5 + diverging */
-  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4;
-  --div-pos: #2a78d6; --div-neg: #e34948; --grid: #e2e8f0; --axis: #cbd5e1;
-  --shadow: 0 1px 2px rgba(15, 23, 42, .05), 0 1px 3px rgba(15, 23, 42, .06);
+  color-scheme: light;
+  --bg: #f6f3ea; --surface: #fffdf7; --surface-2: #efebdf; --border: #ddd7c8;
+  --text: #2e3a31; --text-2: #46534a; --muted: #687265; --faint: #9ea397;
+  --primary: #56755b; --primary-2: #44604a; --primary-soft: #e3eadb; --on-primary: #fffdf7;
+  --accent: #c08a4b; --accent-ink: #8a5a22; --accent-soft: #f3e6d3;
+  --hero-bg: #e3eadb; --hero-sub: #55665a;
+  --cat: #262826;
+  --ok: #3e7b3a; --ok-soft: #e4efdd; --warn: #8f5e10; --warn-soft: #f6ebd3; --bad: #a8423a; --bad-soft: #f7e4e0;
+  --c1: #3d8b62; --c2: #8c5cc2; --c3: #c06f1c; --c4: #4176c2; --c5: #c84f63;
+  --train: #3d8b62; --test: #c06f1c; --curve: #c06f1c; --mark-cur: #c06f1c;
+  --div-pos: #4176c2; --div-neg: #c84f63; --grid: #e8e3d6; --axis: #cfc8b6;
+  --shadow: 0 1px 2px rgba(46, 58, 49, .05), 0 2px 6px rgba(46, 58, 49, .05);
   --f-ui: "Inter", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --f-serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0b1120; --surface: #111827; --surface-2: #1e293b; --border: #263247;
-    --text: #e2e8f0; --text-2: #cbd5e1; --muted: #94a3b8; --faint: #64748b;
-    --primary: #818cf8; --primary-2: #a5b4fc; --primary-soft: #1e1b4b; --on-primary: #0b1120;
-    --ok: #34d399; --ok-soft: #052e22; --warn: #fbbf24; --warn-soft: #2b2007; --bad: #f87171; --bad-soft: #2c0f0f;
-    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181;
-    --div-pos: #3987e5; --div-neg: #e66767; --grid: #263247; --axis: #334155;
-    --shadow: none; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0b1120; --surface: #111827; --surface-2: #1e293b; --border: #263247;
-  --text: #e2e8f0; --text-2: #cbd5e1; --muted: #94a3b8; --faint: #64748b;
-  --primary: #818cf8; --primary-2: #a5b4fc; --primary-soft: #1e1b4b; --on-primary: #0b1120;
-  --ok: #34d399; --ok-soft: #052e22; --warn: #fbbf24; --warn-soft: #2b2007; --bad: #f87171; --bad-soft: #2c0f0f;
-  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181;
-  --div-pos: #3987e5; --div-neg: #e66767; --grid: #263247; --axis: #334155;
-  --shadow: none; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--f-ui); font-size: 15px; line-height: 1.6; }
-h1, h2, h3 { margin: 0; line-height: 1.25; text-wrap: balance; }
+h1, h2, h3 { margin: 0; line-height: 1.3; text-wrap: balance; font-family: var(--f-serif); font-weight: 700; }
 p { margin: 0; }
 a { color: var(--primary); }
 button, select, input { font: inherit; }
@@ -65,18 +51,24 @@ button, select, input { font: inherit; }
 .top-header h1 { font-size: clamp(1.1rem, 2.4vw, 1.45rem); font-weight: 800; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
 .brand-badge { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; background: var(--primary); color: var(--on-primary); padding: 2px 8px; border-radius: 99px; }
 .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.ref-btn { font-size: 0.8rem; font-weight: 600; text-decoration: none; color: var(--text-2); border: 1px solid var(--border); background: var(--surface-2); border-radius: 8px; padding: 6px 12px; }
+.ref-btn { font-size: 0.8rem; font-weight: 600; text-decoration: none; color: var(--text-2); border: 1px solid var(--border); background: var(--surface); border-radius: 99px; padding: 6px 14px; }
 .ref-btn:hover { border-color: var(--primary); color: var(--primary); }
+@media (max-width: 640px) { .top-header { position: static; } .ref-btn { padding: 4px 10px; font-size: 0.74rem; } }
 
 main { display: grid; gap: 20px; padding-block: 24px 64px; }
 
 /* Hero */
-.hero { background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c)); color: #fff; border-radius: 18px; padding: 28px clamp(20px, 4vw, 36px); display: grid; gap: 12px; }
+.hero { background: var(--hero-bg); color: var(--text); border-radius: 18px; padding: 28px clamp(20px, 4vw, 36px); display: grid; gap: 12px; position: relative; overflow: hidden; }
+.hero > * { position: relative; z-index: 1; max-width: min(760px, 100%); }
+.hero .sleepy { position: absolute; right: clamp(12px, 3vw, 40px); bottom: 0; width: clamp(150px, 20vw, 220px); z-index: 0; color: var(--cat); max-width: none; }
+.hero .sleepy .zz { fill: var(--hero-sub); }
+@media (max-width: 720px) { .hero .sleepy { position: static; justify-self: end; width: 130px; margin: -6px -8px -28px 0; } }
+body { overflow-x: clip; }
 .hero h2 { font-size: clamp(1.4rem, 3.2vw, 2rem); font-weight: 800; }
-.hero p { color: rgba(255, 255, 255, .84); max-width: 80ch; }
-.hero p b { color: #fff; }
+.hero p { color: var(--hero-sub); max-width: 70ch; }
+.hero p b { color: var(--text); }
 .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.hero-chip { font-size: 0.78rem; font-weight: 500; padding: 4px 11px; border-radius: 99px; background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .22); }
+.hero-chip { font-size: 0.78rem; font-weight: 500; padding: 4px 11px; border-radius: 99px; background: rgba(255, 253, 247, .7); border: 1px solid var(--border); color: var(--text-2); }
 
 /* Cards */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); display: grid; gap: 14px; min-width: 0; align-content: start; }
@@ -131,7 +123,7 @@ details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: 
 .kpi { background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--kc, var(--primary)); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); display: grid; gap: 4px; align-content: start; min-width: 0; }
 .kpi .k-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; flex-wrap: wrap; }
 .kpi .k-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
-.kpi .k-value { font-size: clamp(1.25rem, 2.2vw, 1.6rem); font-weight: 700; font-family: var(--f-mono); overflow-wrap: anywhere; }
+.kpi .k-value { font-size: clamp(1.3rem, 2.3vw, 1.7rem); font-weight: 700; font-family: var(--f-serif); overflow-wrap: anywhere; }
 .kpi .k-sub { font-size: 0.78rem; color: var(--muted); }
 .badge { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
 .badge.ok { background: var(--ok-soft); color: var(--ok); }
@@ -143,7 +135,7 @@ details summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; color: 
 .pchip { font-size: 0.8rem; font-weight: 600; padding: 3px 10px; border-radius: 99px; background: var(--primary-soft); color: var(--primary); font-family: var(--f-mono); }
 
 /* Equation */
-.equation { border-left: 4px solid var(--primary); }
+.equation { border-left: 4px solid var(--primary); border-radius: 0 14px 14px 0; }
 .equation .eq { font-family: var(--f-mono); font-size: clamp(0.85rem, 1.6vw, 1rem); font-weight: 600; overflow-wrap: anywhere; }
 
 /* Tables */
@@ -190,17 +182,25 @@ svg.chart .hit { fill: transparent; cursor: crosshair; }
 .slider input[type="range"] { width: 100%; accent-color: var(--primary); }
 .slider select { padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
 .slider .note { font-size: 0.74rem; color: var(--warn); min-height: 1em; }
-.pred-card { background: linear-gradient(135deg, var(--hero-a), var(--hero-b)); color: #fff; border-radius: 14px; padding: 22px; display: grid; gap: 8px; align-content: center; text-align: center; }
+.pred-card { background: var(--primary-soft); color: var(--text); border-radius: 14px; padding: 22px 22px 58px; display: grid; gap: 8px; align-content: center; text-align: center; position: relative; overflow: hidden; }
+.pred-card .peek { position: absolute; right: 18px; bottom: -4px; width: 40px; color: var(--cat); }
 .pred-card .lbl { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: .8; }
-.pred-card .val { font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 800; color: #6ee7b7; font-family: var(--f-mono); line-height: 1.1; }
-.pred-card .sub { font-size: 0.82rem; opacity: .85; }
+.pred-card .val { font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 700; color: var(--primary-2); font-family: var(--f-serif); line-height: 1.1; }
+.pred-card .sub { font-size: 0.82rem; color: var(--text-2); }
 .copy-box { background: var(--surface-2); border-radius: 10px; padding: 14px; font-size: 0.9rem; line-height: 1.7; }
 ul.plain { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
 .busy { opacity: .45; pointer-events: none; transition: opacity .15s; }
-footer { border-top: 1px solid var(--border); background: var(--surface); padding-block: 28px 40px; font-size: 0.86rem; color: var(--muted); }
+footer { border-top: 1px solid var(--border); background: var(--surface); padding-block: 28px 40px; font-size: 0.86rem; color: var(--muted); position: relative; }
+footer .sitter { position: absolute; left: max(20px, calc(50% - 600px)); top: -46px; width: 34px; color: var(--cat); }
+footer .trail { position: absolute; left: max(64px, calc(50% - 556px)); top: -14px; display: flex; gap: 10px; color: var(--faint); }
+footer .trail svg { width: 11px; transform: rotate(80deg); }
+footer .trail svg:nth-child(even) { margin-top: 5px; }
 footer h4 { margin: 0 0 8px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2); }
 footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.cat-ico { width: 1.25em; height: 1.25em; color: var(--cat); flex: none; }
+.paw { width: 0.95em; height: 0.95em; vertical-align: -0.1em; fill: currentColor; }
+.seg button[aria-pressed="true"] .tag-ok { background: var(--accent-soft); color: var(--accent-ink); }
 </style>
 </head>
 <body>
@@ -211,7 +211,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
       <nav class="breadcrumbs" aria-label="麵包屑">
         <a href="index.html">首頁</a><span aria-hidden="true">›</span><a href="#controls">迴歸分析</a><span aria-hidden="true">›</span><b id="crumb">50 Startups</b>
       </nav>
-      <h1>多元線性迴歸探索器 <span class="brand-badge">CRISP-DM</span></h1>
+      <h1><svg class="cat-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 11V3.5l4.6 3.6a9 9 0 0 1 6.8 0L20 3.5V11c.8 1.2 1.2 2.5 1.2 3.8 0 3.8-4.1 6.4-9.2 6.4s-9.2-2.6-9.2-6.4C2.8 13.5 3.2 12.2 4 11Z"/></svg>多元線性迴歸探索器 <span class="brand-badge">CRISP-DM</span></h1>
     </div>
     <div class="header-actions">
       <a class="ref-btn" href="index.html">50 Startups 專案報告</a>
@@ -227,6 +227,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
     <h2 id="heroTitle">特徵選擇與精簡模型分析</h2>
     <p id="heroText">載入資料中…</p>
     <div class="hero-chips" id="heroChips"></div>
+    <svg class="sleepy" viewBox="0 0 160 92" aria-hidden="true"><path d="M46 90c-14 0-22-7-20-17 3-13 22-22 47-22 30 0 52 10 54 25 1 9-6 14-20 14Z" fill="currentColor"/><path d="M106 90c15 0 25-4 23-12-1-6-8-7-11-3" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M27 80c-11 0-17-7-16-16 1-7 4-11 4-11l-2-15 12 9c4-2 10-2 14 0l12-9-2 15s3 4 4 11c1 9-6 16-17 16Z" fill="currentColor" stroke="var(--hero-bg)" stroke-width="2.5" paint-order="stroke"/><g class="zz" font-family="Noto Serif TC, serif"><text x="50" y="34" font-size="15">z</text><text x="60" y="22" font-size="11">z</text><text x="68" y="13" font-size="8">z</text></g></svg>
   </section>
 
   <section class="card" id="controls" aria-label="分析設定">
@@ -347,6 +348,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
             <div class="val" id="predValue">—</div>
             <div class="sub" id="predRange"></div>
             <div class="sub" id="predParts"></div>
+            <svg class="peek" viewBox="0 0 44 62" fill="currentColor" aria-hidden="true"><path d="M12 61c-5-6-6-15-3-22-3-3-5-8-4-13L4 12l8 6c3-1 8-1 11 0l8-6-1 14c1 5-1 10-4 13 3 7 2 16-3 22Z"/><path d="M27 57c9 1 15-3 14-10-1-4-4-6-7-5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>
           </div>
         </div>
       </div>
@@ -370,6 +372,8 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
 </main>
 
 <footer>
+  <svg class="sitter" viewBox="0 0 44 62" fill="currentColor" aria-hidden="true"><path d="M12 61c-5-6-6-15-3-22-3-3-5-8-4-13L4 12l8 6c3-1 8-1 11 0l8-6-1 14c1 5-1 10-4 13 3 7 2 16-3 22Z"/><path d="M27 57c9 1 15-3 14-10-1-4-4-6-7-5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>
+  <div class="trail" aria-hidden="true"><svg class="paw" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="11" rx="3.6" ry="3"/><circle cx="3.6" cy="7" r="1.6"/><circle cx="6.4" cy="4.2" r="1.6"/><circle cx="9.6" cy="4.2" r="1.6"/><circle cx="12.4" cy="7" r="1.6"/></svg><svg class="paw" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="11" rx="3.6" ry="3"/><circle cx="3.6" cy="7" r="1.6"/><circle cx="6.4" cy="4.2" r="1.6"/><circle cx="9.6" cy="4.2" r="1.6"/><circle cx="12.4" cy="7" r="1.6"/></svg><svg class="paw" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="11" rx="3.6" ry="3"/><circle cx="3.6" cy="7" r="1.6"/><circle cx="6.4" cy="4.2" r="1.6"/><circle cx="9.6" cy="4.2" r="1.6"/><circle cx="12.4" cy="7" r="1.6"/></svg><svg class="paw" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="11" rx="3.6" ry="3"/><circle cx="3.6" cy="7" r="1.6"/><circle cx="6.4" cy="4.2" r="1.6"/><circle cx="9.6" cy="4.2" r="1.6"/><circle cx="12.4" cy="7" r="1.6"/></svg></div>
   <div class="container grid2">
     <div>
       <h4>多元線性迴歸探索器</h4>
@@ -430,7 +434,9 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
     return (v < 0 ? "−" : "") + (ds && ds.unit === "$" ? "$" : "") + s;
   }
   const shortK = v => (Math.abs(v) >= 10000 ? (v < 0 ? "−" : "") + Math.round(Math.abs(v) / 1000) + "k" : Math.abs(v) >= 100 ? String(Math.round(v)) : String(+v.toFixed(2)));
-  function badge(kind, text, icon) { return h("span", { class: "badge " + kind }, icon ? h("i", { "aria-hidden": "true", text: icon }) : null, text); }
+  const PAW_SVG = '<svg class="paw" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="11" rx="3.6" ry="3"/><circle cx="3.6" cy="7" r="1.6"/><circle cx="6.4" cy="4.2" r="1.6"/><circle cx="9.6" cy="4.2" r="1.6"/><circle cx="12.4" cy="7" r="1.6"/></svg>';
+  function paw() { const t = document.createElement("template"); t.innerHTML = PAW_SVG; return t.content.firstChild; }
+  function badge(kind, text, icon) { return h("span", { class: "badge " + kind }, icon === "paw" ? paw() : icon ? h("i", { "aria-hidden": "true", text: icon }) : null, text); }
 
   const tip = $("tip");
   function showTip(evt, title, items) {
@@ -489,12 +495,13 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
   function dot(g, cx, cy, color, opts = {}) {
     const grp = el("g", { tabindex: 0 }, g.svg);
     el("circle", { cx, cy, r: 12, class: "hit" }, grp);
-    el("circle", { cx, cy, r: opts.r || 4, fill: color, stroke: "var(--surface)", "stroke-width": opts.r && opts.r < 3.5 ? 1 : 2, "fill-opacity": opts.op || 1 }, grp);
+    if (opts.hollow) el("circle", { cx, cy, r: (opts.r || 4) + 0.5, fill: "var(--surface)", stroke: color, "stroke-width": 2 }, grp);
+    else el("circle", { cx, cy, r: opts.r || 4, fill: color, stroke: "var(--surface)", "stroke-width": opts.r && opts.r < 3.5 ? 1 : 2, "fill-opacity": opts.op || 1 }, grp);
     if (opts.ring) el("circle", { cx, cy, r: (opts.r || 4) + 4, fill: "none", stroke: "var(--bad)", "stroke-width": 1.5 }, grp);
     return grp;
   }
   function legend(host, items) {
-    $(host).replaceChildren(...items.map(it => h("span", {}, h("i", { class: it.dot ? "dot" : "", style: it.ring ? "background:transparent;border:1.5px solid var(--bad)" : `background:${it.color}` }), it.label)));
+    $(host).replaceChildren(...items.map(it => h("span", {}, h("i", { class: it.dot ? "dot" : "", style: it.ring ? "background:transparent;border:1.5px solid var(--bad)" : it.hollow ? `background:var(--surface);border:2px solid ${it.hollow}` : `background:${it.color}` }), it.label)));
   }
 
   // ------------------------------------------------------------ dataset loading
@@ -680,7 +687,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
       $("kBtns").replaceChildren(...rows.map((r, i) => {
         const added = i === 0 ? E.names[r.cols[0]] : r.cols.filter(c => !rows[i - 1].cols.includes(c)).map(c => E.names[c]).join(" ↔ ") || "換組合";
         const tags = [];
-        if (r.k === b.oneSd) tags.push(h("small", { class: "tag-ok", text: "★ 1-SD 精簡" }));
+        if (r.k === b.oneSd) tags.push(h("small", { class: "tag-ok" }, paw(), " 1-SD 精簡"));
         if (r.k === b.cvBest && r.k !== b.oneSd) tags.push(h("small", { class: "tag-ok", text: "CV 最低" }));
         if (r.k === p) tags.push(h("small", { class: "tag-warn", text: "全部特徵" }));
         return h("button", { type: "button", "aria-pressed": String(r.k === st.k), onclick: () => { st.k = r.k; render(); } },
@@ -715,7 +722,7 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
     const full = ds.fullHo, isOneSd = !manual && algo && ds.best[progAlgo].oneSd === st.k;
     const kpi = (label, value, sub, color, b) => h("div", { class: "kpi", style: `--kc:${color}` }, h("div", { class: "k-head" }, h("span", { class: "k-label", text: label }), b || null), h("div", { class: "k-value", text: value }), h("div", { class: "k-sub", text: sub }));
     $("kpis").replaceChildren(
-      kpi("Test RMSE", yFmt(ho.rmse), `全部特徵 ${yFmt(full.rmse)}；越低越好`, "var(--primary)", isOneSd ? badge("ok", "1-SD 精簡", "★") : ho.rmse <= full.rmse + 1e-9 ? badge("ok", "≤ 全部特徵") : badge("warn", "> 全部特徵")),
+      kpi("Test RMSE", yFmt(ho.rmse), `全部特徵 ${yFmt(full.rmse)}；越低越好`, "var(--primary)", isOneSd ? badge("ok", "1-SD 精簡", "paw") : ho.rmse <= full.rmse + 1e-9 ? badge("ok", "≤ 全部特徵") : badge("warn", "> 全部特徵")),
       kpi("Test R²", fx(ho.r2), `測試集解釋力；全部特徵 ${fx(full.r2)}`, "var(--c3)", badge(ho.r2 >= 0.9 ? "ok" : ho.r2 >= 0.7 ? "info" : "warn", `${(ho.r2 * 100).toFixed(1)}% FIT`)),
       kpi("Adjusted R²", fx(fit.adjR2), `${st.mode === "train" ? "訓練集" : "全部資料"}擬合，懲罰多餘特徵`, "var(--c5)"),
       kpi("Mean Absolute Error", yFmt(ho.mae), "測試集平均預測誤差", "var(--c4)"),
@@ -767,24 +774,24 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
     const showAll = st.algo === "compare", series = showAll ? keys : [algo];
     const colors = { lasso: "var(--c1)", sfs: "var(--c2)", rfe: "var(--c3)", enet: "var(--c4)", exhaustive: "var(--c5)" };
     const p = ds.E.names.length, xs = [0.6, p + 0.4], xt = [...Array(p).keys()].map(i => i + 1);
-    const leg = series.map(k => ({ color: showAll ? colors[k] : "var(--primary)", label: S.METHODS.find(m => m.key === k).title }));
-    const legItems = showAll ? leg : [...leg, { color: "var(--ok)", dot: true, label: "目前的 k" }];
+    const leg = series.map(k => ({ color: showAll ? colors[k] : "var(--c1)", label: S.METHODS.find(m => m.key === k).title }));
+    const legItems = showAll ? leg : [...leg, { color: "var(--mark-cur)", dot: true, label: "目前的 k" }];
     legend("legRmse", legItems); legend("legR2", legItems);
     [["chRmse", "testRmse", "Test RMSE", v => yFmt(v)], ["chR2", "testR2", "Test R²", v => v.toFixed(4)]].forEach(([host, key, yl, f]) => {
       const vals = series.flatMap(k => P[k].map(r => r[key]));
       const g = frame(host, { x: xs, y: domain(vals, 0.08), xt, xf: String, yf: key === "testR2" ? v => v.toFixed(3) : shortK, xl: "Number of Features (k)", yl, label: `${yl} 對特徵數` });
-      if (!showAll && st.algo !== "manual") el("rect", { x: g.x(st.k) - 14, y: g.m.t, width: 28, height: g.H - g.m.t - g.m.b, rx: 6, fill: "var(--primary)", "fill-opacity": 0.08 }, g.svg);
+      if (!showAll && st.algo !== "manual") el("rect", { x: g.x(st.k) - 14, y: g.m.t, width: 28, height: g.H - g.m.t - g.m.b, rx: 6, fill: "var(--accent)", "fill-opacity": 0.12 }, g.svg);
       series.forEach((k, si) => {
-        const c = showAll ? colors[k] : "var(--primary)", pts = P[k].map(r => [g.x(r.k), g.y(r[key])]);
+        const c = showAll ? colors[k] : "var(--c1)", pts = P[k].map(r => [g.x(r.k), g.y(r[key])]);
         el("polyline", { points: pts.map(q => q.join(",")).join(" "), fill: "none", stroke: c, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, g.svg);
-        P[k].forEach((r, i) => { const cur = !showAll && r.k === st.k && st.algo !== "manual"; el("circle", { cx: pts[i][0] + (showAll ? (si - 2) * 2.5 : 0), cy: pts[i][1], r: cur ? 6 : 4, fill: cur ? "var(--ok)" : c, stroke: "var(--surface)", "stroke-width": 2 }, g.svg); });
+        P[k].forEach((r, i) => { const cur = !showAll && r.k === st.k && st.algo !== "manual"; el("circle", { cx: pts[i][0] + (showAll ? (si - 2) * 2.5 : 0), cy: pts[i][1], r: cur ? 6 : 4, fill: cur ? "var(--mark-cur)" : c, stroke: "var(--surface)", "stroke-width": 2 }, g.svg); });
       });
       const cross = el("line", { y1: g.m.t, y2: g.H - g.m.b, stroke: "var(--axis)", visibility: "hidden" }, g.svg);
       const hit = el("rect", { x: g.m.l, y: g.m.t, width: g.W - g.m.l - g.m.r, height: g.H - g.m.t - g.m.b, class: "hit", tabindex: 0 }, g.svg);
       const kAt = e => { const r = g.svg.getBoundingClientRect(), px = (e.clientX - r.left) / r.width * g.W; return Math.min(p, Math.max(1, Math.round(xs[0] + (px - g.m.l) / (g.W - g.m.l - g.m.r) * (xs[1] - xs[0])))); };
       bindTip(hit, e => {
         const kk = kAt(e); cross.setAttribute("x1", g.x(kk)); cross.setAttribute("x2", g.x(kk)); cross.setAttribute("visibility", "visible");
-        return [`k = ${kk} · ${yl}`, series.map(s => { const r = P[s][kk - 1]; return { color: showAll ? colors[s] : "var(--primary)", value: f(r[key]), label: `${S.METHODS.find(m => m.key === s).title}：${r.cols.map(c => ds.E.names[c]).join(", ")}` }; })];
+        return [`k = ${kk} · ${yl}`, series.map(s => { const r = P[s][kk - 1]; return { color: showAll ? colors[s] : "var(--c1)", value: f(r[key]), label: `${S.METHODS.find(m => m.key === s).title}：${r.cols.map(c => ds.E.names[c]).join(", ")}` }; })];
       });
       hit.addEventListener("pointerleave", () => cross.setAttribute("visibility", "hidden"));
       hit.addEventListener("click", e => { if (st.algo === "manual") return; st.k = kAt(e); if (st.algo === "compare") st.algo = "lasso"; render(); });
@@ -812,18 +819,18 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
     const cut = 4 / n, small = n > 300;
     const label = id => `第 ${ds.records[id].__row + 1} 列`;
     const dotOpts = extra => Object.assign(small ? { r: 2.5, op: 0.7 } : {}, extra || {});
-    legend("legAvp", [{ color: "var(--c1)", dot: true, label: haveTest ? "訓練集（擬合）" : "全部資料（擬合）" }, ...(haveTest ? [{ color: "var(--c2)", dot: true, label: "測試集（預測）" }] : [])]);
+    legend("legAvp", [{ color: "var(--train)", dot: true, label: haveTest ? "訓練集（擬合，實心）" : "全部資料（擬合）" }, ...(haveTest ? [{ hollow: "var(--test)", dot: true, label: "測試集（預測，空心）" }] : [])]);
     const dm = domain([...fitPts, ...testPts].flatMap(q => [q.actual, q.pred]), 0.03);
     let g = frame("avp", { x: dm, y: dm, xl: `Actual ${ds.target}`, yl: `Predicted ${ds.target}`, label: "實際值對預測值" });
     el("line", { x1: g.x(dm[0]), y1: g.y(dm[0]), x2: g.x(dm[1]), y2: g.y(dm[1]), stroke: "var(--faint)", "stroke-dasharray": "4 4" }, g.svg);
-    [...fitPts.map(q => [q, "var(--c1)", "擬合"]), ...testPts.map(q => [q, "var(--c2)", "測試"])].forEach(([q, c, lab]) =>
-      bindTip(dot(g, g.x(q.actual), g.y(q.pred), c, dotOpts()), () => [`${label(q.id)} · ${lab}`, [{ value: yFmt(q.pred, 1), label: "預測" }, { value: yFmt(q.actual, 1), label: "實際" }, { value: yFmt(q.actual - q.pred, 1), label: "誤差" }]]));
+    [...fitPts.map(q => [q, "var(--train)", "擬合", false]), ...testPts.map(q => [q, "var(--test)", "測試", true])].forEach(([q, c, lab, hollow]) =>
+      bindTip(dot(g, g.x(q.actual), g.y(q.pred), c, dotOpts({ hollow })), () => [`${label(q.id)} · ${lab}`, [{ value: yFmt(q.pred, 1), label: "預測" }, { value: yFmt(q.actual, 1), label: "實際" }, { value: yFmt(q.actual - q.pred, 1), label: "誤差" }]]));
 
-    legend("legRvf", [{ color: "var(--c1)", dot: true, label: "殘差" }, ...(small ? [] : [{ ring: true, label: `影響點（Cook's D > 4/n = ${cut.toFixed(3)}）` }])]);
+    legend("legRvf", [{ color: "var(--train)", dot: true, label: "殘差" }, ...(small ? [] : [{ ring: true, label: `影響點（Cook's D > 4/n = ${cut.toFixed(3)}）` }])]);
     const rmax = Math.max(...fitPts.map(q => Math.abs(q.resid)));
     g = frame("rvf", { x: domain(fitPts.map(q => q.pred), 0.04), y: domain([-rmax, rmax], 0.08), xl: `Fitted ${ds.target}`, yl: "Residual", label: "殘差對預測值" });
     el("line", { x1: g.m.l, x2: g.W - g.m.r, y1: g.y(0), y2: g.y(0), stroke: "var(--faint)", "stroke-dasharray": "4 4" }, g.svg);
-    fitPts.forEach(q => bindTip(dot(g, g.x(q.pred), g.y(q.resid), "var(--c1)", dotOpts({ ring: q.cook > cut && !small })), () => [label(q.id), [{ value: yFmt(q.resid, 1), label: "殘差" }, { value: yFmt(q.pred, 1), label: "預測值" }, { value: q.cook.toFixed(3), label: "Cook's D" }]]));
+    fitPts.forEach(q => bindTip(dot(g, g.x(q.pred), g.y(q.resid), "var(--train)", dotOpts({ ring: q.cook > cut && !small })), () => [label(q.id), [{ value: yFmt(q.resid, 1), label: "殘差" }, { value: yFmt(q.pred, 1), label: "預測值" }, { value: q.cook.toFixed(3), label: "Cook's D" }]]));
 
     (function () {
       const Xf = ids.map(i => cols.map(j => ds.X[i][j])), sx = cols.map((_, j) => R.sd(Xf.map(r => r[j]))), sy = R.sd(ids.map(i => ds.y[i]));
@@ -857,10 +864,10 @@ footer ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
       bins.forEach(b => {
         const grp = el("g", { tabindex: 0 }, g.svg);
         el("rect", { x: g.x(b.a), y: g.m.t, width: g.x(b.b) - g.x(b.a), height: g.H - g.m.t - g.m.b, class: "hit" }, grp);
-        if (b.n) el("rect", { x: g.x(b.a) + 1, y: g.y(b.n), width: Math.max(1, g.x(b.b) - g.x(b.a) - 2), height: g.y(0) - g.y(b.n), rx: 3, fill: "var(--c1)", "fill-opacity": 0.85 }, grp);
+        if (b.n) el("rect", { x: g.x(b.a) + 1, y: g.y(b.n), width: Math.max(1, g.x(b.b) - g.x(b.a) - 2), height: g.y(0) - g.y(b.n), rx: 3, fill: "var(--train)", "fill-opacity": 0.85 }, grp);
         bindTip(grp, () => [`殘差 ${yFmt(b.a)} 到 ${yFmt(b.b)}`, [{ value: String(b.n), label: "筆" }]]);
       });
-      el("polyline", { points: Array.from({ length: 60 }, (_, i) => { const v = lo - bw * 0.5 + i / 59 * (hi - lo + bw); return `${g.x(v)},${g.y(pdf(v))}`; }).join(" "), fill: "none", stroke: "var(--c2)", "stroke-width": 2 }, g.svg);
+      el("polyline", { points: Array.from({ length: 60 }, (_, i) => { const v = lo - bw * 0.5 + i / 59 * (hi - lo + bw); return `${g.x(v)},${g.y(pdf(v))}`; }).join(" "), fill: "none", stroke: "var(--curve)", "stroke-width": 2 }, g.svg);
     })();
 
     const T = fit.tests, A = st.alpha, maxVif = Math.max(...fit.vif), infl = fitPts.filter(q => q.cook > cut);

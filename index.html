@@ -7,43 +7,36 @@
 <meta name="description" content="50 Startups 多元線性迴歸：CRISP-DM 六階段專案紀錄">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 body { margin: 0; }
 
 /* Layout: shares the explorer's look (breadcrumb header, indigo hero); below it each CRISP-DM phase is a numbered entry on a vertical timeline rail. */
+/* Palette "matcha & washi" (shared with app.html). Light only. */
 :root {
-  --bg: #f8fafc;
-  --surface: #ffffff;
-  --surface-2: #f1f5f9;
-  --fg: #0f172a;
-  --muted: #64748b;
-  --line: #e2e8f0;
-  --ink: #4f46e5;        /* primary: indigo */
-  --ink-soft: #eef2ff;
-  --on-ink: #ffffff;
-  --money: #059669;      /* profit / pass */
-  --money-soft: #ecfdf5;
-  --warn: #b45309;
-  --warn-soft: #fffbeb;
-  --neg: #dc2626;
-  --hero-a: #1e1b4b; --hero-b: #3730a3; --hero-c: #5b21b6;
-  --shadow: 0 1px 2px rgba(15, 23, 42, .05), 0 1px 3px rgba(15, 23, 42, .06);
-  --f-display: "Inter", "Noto Sans TC", system-ui, sans-serif;
+  color-scheme: light;
+  --bg: #f6f3ea;
+  --surface: #fffdf7;
+  --surface-2: #efebdf;
+  --fg: #2e3a31;
+  --muted: #687265;
+  --line: #ddd7c8;
+  --ink: #56755b;        /* primary: sage */
+  --ink-2: #44604a;
+  --ink-soft: #e3eadb;
+  --on-ink: #fffdf7;
+  --money: #3e7b3a;      /* profit / pass */
+  --money-soft: #e4efdd;
+  --warn: #8f5e10;
+  --warn-soft: #f6ebd3;
+  --neg: #c84f63;
+  --accent: #c08a4b;
+  --hero-bg: #e3eadb; --hero-sub: #55665a;
+  --cat: #262826;
+  --shadow: 0 1px 2px rgba(46, 58, 49, .05), 0 2px 6px rgba(46, 58, 49, .05);
+  --f-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   --f-body: "Inter", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0b1120; --surface: #111827; --surface-2: #1e293b; --fg: #e2e8f0; --muted: #94a3b8; --line: #263247;
-    --ink: #818cf8; --ink-soft: #1e1b4b; --on-ink: #0b1120; --money: #34d399; --money-soft: #052e22;
-    --warn: #fbbf24; --warn-soft: #2b2007; --neg: #f87171; --shadow: none; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0b1120; --surface: #111827; --surface-2: #1e293b; --fg: #e2e8f0; --muted: #94a3b8; --line: #263247;
-  --ink: #818cf8; --ink-soft: #1e1b4b; --on-ink: #0b1120; --money: #34d399; --money-soft: #052e22;
-  --warn: #fbbf24; --warn-soft: #2b2007; --neg: #f87171; --shadow: none; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.65; }
@@ -67,14 +60,25 @@ p { margin: 0; }
 .top-header h1 { font-size: clamp(1.1rem, 2.4vw, 1.45rem); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
 .brand-badge { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; background: var(--ink); color: var(--on-ink); padding: 2px 8px; border-radius: 99px; font-family: var(--f-body); }
 .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.ref-btn { font-size: 0.8rem; font-weight: 600; text-decoration: none; color: var(--fg); border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 6px 12px; }
+.ref-btn { font-size: 0.8rem; font-weight: 600; text-decoration: none; color: var(--fg); border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 14px; }
+@media (max-width: 640px) { .top-header { position: static; } .ref-btn { padding: 4px 10px; font-size: 0.74rem; } }
+.cat-ico { width: 1.25em; height: 1.25em; color: var(--cat); flex: none; }
+footer .sitter { position: absolute; left: max(20px, calc(50% - 600px)); top: -46px; width: 34px; color: var(--cat); }
+footer .trail { position: absolute; left: max(64px, calc(50% - 556px)); top: -14px; display: flex; gap: 10px; color: #9ea397; }
+footer .trail svg { width: 11px; transform: rotate(80deg); fill: currentColor; }
+footer .trail svg:nth-child(even) { margin-top: 5px; }
 .ref-btn:hover { border-color: var(--ink); color: var(--ink); }
 .ref-btn.primary { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
-.hero { background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c)); color: #fff; border-radius: 18px; padding: 28px clamp(20px, 4vw, 36px); display: grid; gap: 12px; margin-bottom: 20px; }
-.hero h2 { font-size: clamp(1.4rem, 3.2vw, 2rem); font-weight: 800; color: #fff; }
-.hero p { color: rgba(255, 255, 255, .84); max-width: 80ch; }
-.hero p b { color: #fff; }
-.hero .eyebrow { color: rgba(255, 255, 255, .7); }
+.hero { background: var(--hero-bg); color: var(--fg); border-radius: 18px; padding: 28px clamp(20px, 4vw, 36px); display: grid; gap: 12px; margin-bottom: 20px; position: relative; overflow: hidden; }
+.hero > * { position: relative; z-index: 1; max-width: min(760px, 100%); }
+.hero .sleepy { position: absolute; right: clamp(12px, 3vw, 40px); bottom: 0; width: clamp(150px, 20vw, 220px); z-index: 0; color: var(--cat); max-width: none; }
+.hero .sleepy .zz { fill: var(--hero-sub); }
+@media (max-width: 720px) { .hero .sleepy { position: static; justify-self: end; width: 130px; margin: -6px -8px -28px 0; } }
+body { overflow-x: clip; }
+.hero h2 { font-size: clamp(1.4rem, 3.2vw, 2rem); font-weight: 700; color: var(--fg); }
+.hero p { color: var(--hero-sub); max-width: 70ch; }
+.hero p b { color: var(--fg); }
+.hero .eyebrow { color: var(--hero-sub); }
 
 /* Fact strip */
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 36px; box-shadow: var(--shadow); }
@@ -140,10 +144,10 @@ figure { margin: 0; }
 figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
 
 /* Takeaways */
-.takeaways { background: linear-gradient(120deg, var(--hero-a), var(--hero-b) 55%, var(--hero-c)); color: #fff; border-radius: 12px; padding: 24px; display: grid; gap: 16px; margin-top: 8px; }
-.takeaways h2 { color: #fff; }
+.takeaways { background: var(--hero-bg); color: var(--fg); border-radius: 12px; padding: 24px; display: grid; gap: 16px; margin-top: 8px; }
+.takeaways h2 { color: var(--fg); }
 .takeaways .grid3 { grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr)); }
-.takeaways .grid3 > div { border-top: 1px solid rgba(255, 255, 255, .3); padding-top: 10px; }
+.takeaways .grid3 > div { border-top: 1px solid var(--line); padding-top: 10px; }
 .takeaways b { font-family: var(--f-display); font-size: 1.05rem; display: block; }
 .takeaways p { opacity: 0.85; font-size: 0.88rem; }
 
@@ -156,9 +160,7 @@ figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
 </style>
 
 <style>
-:root { --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; } }
-:root[data-theme="dark"] { --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; }
+:root { --s1: #3d8b62; --s2: #8c5cc2; --s3: #c06f1c; --s4: #4176c2; --s5: #c84f63; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.82rem; margin-bottom: 8px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
@@ -175,7 +177,7 @@ figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
   <div class="header-inner">
     <div>
       <nav class="breadcrumbs" aria-label="麵包屑"><b>首頁</b><span aria-hidden="true">›</span><a href="app.html">迴歸分析</a></nav>
-      <h1>50 Startups 專案報告 <span class="brand-badge">CRISP-DM</span></h1>
+      <h1><svg class="cat-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 11V3.5l4.6 3.6a9 9 0 0 1 6.8 0L20 3.5V11c.8 1.2 1.2 2.5 1.2 3.8 0 3.8-4.1 6.4-9.2 6.4s-9.2-2.6-9.2-6.4C2.8 13.5 3.2 12.2 4 11Z"/></svg>50 Startups 專案報告 <span class="brand-badge">CRISP-DM</span></h1>
     </div>
     <div class="header-actions">
       <a class="ref-btn primary" href="app.html">開啟多元迴歸探索器 →</a>
@@ -187,7 +189,8 @@ figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
   <section class="hero" aria-labelledby="heroTitle">
     <span class="eyebrow" id="eyebrow">AIoT · Multiple Linear Regression</span>
     <h2 id="heroTitle">50 Startups：CRISP-DM 機器學習專案紀錄</h2>
-    <p><b>目標：</b>依 CRISP-DM 六階段，用 scikit-learn 建立多元線性迴歸模型，從研發、行政、行銷支出與所在州別預測新創公司的年度利潤（Profit）。想換資料集、切換演算法或上傳自己的 CSV，請用<a href="app.html" style="color:#fff;font-weight:700">多元迴歸探索器</a>。</p>
+    <p><b>目標：</b>依 CRISP-DM 六階段，用 scikit-learn 建立多元線性迴歸模型，從研發、行政、行銷支出與所在州別預測新創公司的年度利潤（Profit）。想換資料集、切換演算法或上傳自己的 CSV，請用<a href="app.html" style="color:var(--ink-2);font-weight:700">多元迴歸探索器</a>。</p>
+    <svg class="sleepy" viewBox="0 0 160 92" aria-hidden="true"><path d="M46 90c-14 0-22-7-20-17 3-13 22-22 47-22 30 0 52 10 54 25 1 9-6 14-20 14Z" fill="currentColor"/><path d="M106 90c15 0 25-4 23-12-1-6-8-7-11-3" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M27 80c-11 0-17-7-16-16 1-7 4-11 4-11l-2-15 12 9c4-2 10-2 14 0l12-9-2 15s3 4 4 11c1 9-6 16-17 16Z" fill="currentColor" stroke="var(--hero-bg)" stroke-width="2.5" paint-order="stroke"/><g class="zz" font-family="Noto Serif TC, serif"><text x="50" y="34" font-size="15">z</text><text x="60" y="22" font-size="11">z</text><text x="68" y="13" font-size="8">z</text></g></svg>
   </section>
 
   <div id="missing" class="missing" hidden>找不到 <span class="mono">model_data.js</span>。請先執行 <span class="mono">python main.py</span> 產生資料，再重新整理這個頁面。</div>
@@ -455,7 +458,9 @@ figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
   </div>
 </div>
 
-<footer style="border-top:1px solid var(--line);background:var(--surface);padding:28px 20px 40px;font-size:0.86rem;color:var(--muted)">
+<footer style="border-top:1px solid var(--line);background:var(--surface);padding:28px 20px 40px;font-size:0.86rem;color:var(--muted);position:relative;margin-top:40px">
+  <svg class="sitter" viewBox="0 0 44 62" fill="currentColor" aria-hidden="true"><path d="M12 61c-5-6-6-15-3-22-3-3-5-8-4-13L4 12l8 6c3-1 8-1 11 0l8-6-1 14c1 5-1 10-4 13 3 7 2 16-3 22Z"/><path d="M27 57c9 1 15-3 14-10-1-4-4-6-7-5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>
+  <div class="trail" aria-hidden="true"><svg class="paw" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="11" rx="3.6" ry="3"/><circle cx="3.6" cy="7" r="1.6"/><circle cx="6.4" cy="4.2" r="1.6"/><circle cx="9.6" cy="4.2" r="1.6"/><circle cx="12.4" cy="7" r="1.6"/></svg><svg class="paw" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="11" rx="3.6" ry="3"/><circle cx="3.6" cy="7" r="1.6"/><circle cx="6.4" cy="4.2" r="1.6"/><circle cx="9.6" cy="4.2" r="1.6"/><circle cx="12.4" cy="7" r="1.6"/></svg><svg class="paw" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="11" rx="3.6" ry="3"/><circle cx="3.6" cy="7" r="1.6"/><circle cx="6.4" cy="4.2" r="1.6"/><circle cx="9.6" cy="4.2" r="1.6"/><circle cx="12.4" cy="7" r="1.6"/></svg><svg class="paw" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="11" rx="3.6" ry="3"/><circle cx="3.6" cy="7" r="1.6"/><circle cx="6.4" cy="4.2" r="1.6"/><circle cx="9.6" cy="4.2" r="1.6"/><circle cx="12.4" cy="7" r="1.6"/></svg></div>
   <div style="max-width:1240px;margin:0 auto;display:grid;gap:6px">
     <b style="color:var(--fg)">參考資料與致謝</b>
     <span>版面參考：<a href="https://huanchen1107.github.io/AIoT-DIC2-MultipleLR/" target="_blank" rel="noopener" style="color:var(--ink)">AIoT-DIC2 Multiple LR Explorer</a>；統計計算機風格：<a href="https://statsunlock.com/multiple-linear-regression-calculator/" target="_blank" rel="noopener" style="color:var(--ink)">StatsUnlock Multiple Linear Regression Calculator</a></span>
